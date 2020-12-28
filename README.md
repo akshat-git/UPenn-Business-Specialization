@@ -2,7 +2,7 @@
 Business Machines
 
 First you must enable the google sheets and google drive api from the google cloud console, and take the credentials(OAuth2). There are videos about how to enable these and start off with them.
-You must then put these files in your working directory, and put the names into the 
+You must then put these files in your working directory, and put the names into the ids file under the name credentials for each
 
 the drive_test_api file has the main program. run create.py to begin, and then pick up ids from the resulting spreadsheet and folder.
 use these ids by putting them into the respective variable in the ids file
