@@ -298,28 +298,28 @@ request_body_cond = {
                     'gradientRule':{
                         "minpoint": {
                             "color": {
-                                "red": 0.7,
-                                "green": 0,
-                                "blue": 0,
+                                "red": 1,
+                                "green": 1,
+                                "blue": 1,
                                 "alpha": 0.3
                             },
                             "type":"MIN" 
                         },
                         "midpoint": {
                             "color": {
-                                "red": 1,
+                                "red": 0.6,
                                 "green": 1,
-                                "blue": 1,
+                                "blue": 0.6,
                                 "alpha": 1
                             },
                             "type": "PERCENT" ,
-                            "value": "75"
+                            "value": "80"
                         },
                         "maxpoint": {
                             "color": {
                                 "red": 0,
                                 "green": 1,
-                                "blue": 0.2,  
+                                "blue": 0,  
                                 "alpha": 1
                             },
                             "type": "MAX" 
@@ -337,8 +337,21 @@ response_date = sheet_service.spreadsheets().batchUpdate(
 ).execute()
 
 
-
-
+tangline = {
+    '0':['=MAX(F3:F23)'],
+    '0':['=MAX(D3:D23)']
+}
+'''
+sheet_input_df = pd.DataFrame.from_dict(tangline)
+response_date = sheet_service.spreadsheets().values().update(
+    spreadsheetId = file_id,
+    valueInputOption = 'USER_ENTERED',
+    range = sheet04_name+'!G3',
+    body = dict(
+        majorDimension = 'ROWS',
+        values = sheet_input_df.T.reset_index().T.values.tolist())
+).execute()
+'''
 
 # createstock(symbol, sheet, columnIndex, file_id, service,sheet2_id,sheet3_id,days)
 j = 1
@@ -376,6 +389,23 @@ request_body = {
                                 }
                             ],
                             # Chart data
+                            'domains':[
+                                {
+                                    'domain':{
+                                        'sourceRange':{
+                                            'sources':[
+                                                {
+                                                   'sheetId': sheet_id,
+                                                    'startRowIndex': 2, # Row # 1
+                                                    'endRowIndex': 23, # Row # 10
+                                                    'startColumnIndex': 3, # column B
+                                                    'endColumnIndex': 4 
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ],
                             'series': [
                                 {
                                     'series': {
@@ -385,14 +415,30 @@ request_body = {
                                                     'sheetId': sheet_id,
                                                     'startRowIndex': 2, # Row # 1
                                                     'endRowIndex': 23, # Row # 10
-                                                    'startColumnIndex': 3, # column B
+                                                    'startColumnIndex': 4, # column B
                                                     'endColumnIndex': 5
                                                 }
                                             ]
                                         }
                                     },
-                                    'targetAxis': 'LEFT_AXIS'
+                                    'targetAxis': 'LEFT_AXIS',                                    
                                 }
+                                # {
+                                #     'series': {
+                                #         'sourceRange': {
+                                #             'sources': [
+                                #                 {
+                                #                     'sheetId': sheet_id,
+                                #                     'startRowIndex': 2, # Row # 1
+                                #                     'endRowIndex': 4, # Row # 10
+                                #                     'startColumnIndex': 6, # column B
+                                #                     'endColumnIndex': 7
+                                #                 }
+                                #             ]
+                                #         }
+                                #     },
+                                #     'targetAxis': 'LEFT_AXIS',                                    
+                                # }
                             ]
                         }
                     },
@@ -403,10 +449,10 @@ request_body = {
                                 'rowIndex': 1,
                                 'columnIndex': 1
                             },
-                            'offsetXPixels': 1000,
-                            'offsetYPixels': 0,
-                            'widthPixels': 600,
-                            'heightPixels': 400
+                            'offsetXPixels': 506,
+                            'offsetYPixels': 21,
+                            'widthPixels': 800,
+                            'heightPixels': 466
                         }
                      }
                 }
@@ -416,7 +462,7 @@ request_body = {
 }
 
 
-draw_chart = 0 #input("Draw chart? :")
+draw_chart = 'y' #input("Draw chart? :")
 if draw_chart == 'y':
     chart_prop = sheet_service.spreadsheets().batchUpdate(
         spreadsheetId=file_id,
