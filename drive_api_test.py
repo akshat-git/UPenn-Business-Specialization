@@ -1,3 +1,13 @@
+'''
+This file contains the main code
+    - uses google spreadhseet api instance
+    - takes in input for ticker and days
+    - puts values of prices in sheet1
+    - puts returns in sheet2
+    - puts stats in sheet 3
+    - puts graph and data for each set of weightages in sheet4
+'''
+
 from Google import Create_Service
 import pandas as pd
 # from ids import file_id
@@ -40,12 +50,10 @@ symbols = {
 days = int(round(int(input("Working days: "))/5,0))
 skiprows = 0
 
-# =============================================================================
-# Use tickers and put them in sheet
 
 
+
 # =============================================================================
-# Calling the function to populate the sheets with ALL values
 names = {
     '':['Returns','St. Dev.','Sharpe']
 }

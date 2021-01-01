@@ -1,3 +1,8 @@
+'''
+This file contains the code to create a new spreadsheet and a folder.
+The ids created are then used by routines in other parts of the main program.
+'''
+
 from Google import Create_Service
 import pandas as pd
 

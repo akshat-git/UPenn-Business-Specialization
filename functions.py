@@ -1,3 +1,13 @@
+'''
+3 different functions:
+    createstock
+        puts column by column info in sheet 1-3
+    formatCells
+        formats cells
+    sheetclear
+        clears
+'''
+
 import pandas as pd
 from ids import *
 def createstock(symbol, sheet, sheet2, sheet3, columnIndex, file_id, service,sheet2_id,sheet3_id,days):
