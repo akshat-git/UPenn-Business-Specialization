@@ -33,77 +33,28 @@ folder_metadata = {
 # =============================================================================
 
 # =============================================================================
-# Create a new file with multiple sheets
+# File and tickers
 sheet01_name = 'Historic Prices'
 sheet02_name = 'Returns'
 sheet03_name = 'Risk-Returns'
 sheet04_name = 'Final Report'
 
-file_metadata = {
-    'properties': {
-        'title': 'Stock Portfolio Analysis',
-        'locale': 'en_US',
-        'timeZone': 'America/Los Angeles',
-        'autoRecalc': 'ON_CHANGE'
-    },
-    'sheets': [
-        {
-            'properties': {
-                'title': sheet01_name
-            }
-        },
-        {
-            'properties': {
-                'title': sheet02_name
-            }
-        },
-        {
-            'properties': {
-                'title': sheet03_name
-            }
-        },
-        {
-            'properties': {
-                'title': sheet04_name
-            }
-        }
-    ]
-}
-# file_prop = sheet_service.spreadsheets().create(body=file_metadata).execute()
-# file_id = file_prop['spreadsheetId']
-# =============================================================================
-
-# =============================================================================
-#  Move the files created into this folder
-'''
-drive_service.files().update(
-    fileId=file_id,
-    addParents=target_folder_id
-).execute()
-'''
-# =============================================================================
+symbolin1 = input('Ticker Input: ')
+symbolin2 = input('Ticker Input: ')
 
 symbols = {
-    "symbol01" : 'MSFT', 
-    "symbol02" : 'WFC' # ,
-    # "symbol03" : 'AAPL' ,
-    # "symbol04" : 'XOM' ,
-    # "symbol05" : 'COP' ,
-    # "symbol06" : 'BIDU' ,
-    # "symbol07" : 'DIS' ,
-    # "symbol08" : 'GOOG' ,
-    # "symbol09" : 'TSLA' ,
-    # "symbol10" : 'TTM' 
+    "symbol01" : symbolin1, 
+    "symbol02" : symbolin2
 }
-days = int(input("Working days: "))
+days = int(round(int(input("Working days: "))/5,0))
 skiprows = 0
 
 # =============================================================================
-# Accept Tickers and put them in sheet
+# Use tickers and put them in sheet
 def createstock(symbol, sheet, sheet2, sheet3, columnIndex, file_id, service,sheet2_id,sheet3_id,days):
     columns = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
     column = columns[columnIndex]
-    url = "hist_price\\"+symbol+".csv"
+    url = "https://query1.finance.yahoo.com/v7/finance/download/"+ symbol +"?period1=1451520000&period2=1609372800&interval=1wk&events=history&includeAdjustedClose=true"
     stock_price = pd.read_csv(url, skiprows = 0)
     new_set = stock_price['Close']
     new_set = dict(new_set.iloc[::-1])
@@ -132,7 +83,7 @@ def createstock(symbol, sheet, sheet2, sheet3, columnIndex, file_id, service,she
 
 
 
-    days_returns = "=('" + sheet01_name + "'!" + column + "4-'" + sheet01_name + "'!" + column + "3)/'" + sheet01_name + "'!" + column + "3"
+    days_returns = "=('" + sheet01_name + "'!" + column + "3-'" + sheet01_name + "'!" + column + "4)/'" + sheet01_name + "'!" + column + "4"
     request_body_return = {
         'requests': [
             {
@@ -239,7 +190,7 @@ def createstock(symbol, sheet, sheet2, sheet3, columnIndex, file_id, service,she
                             'values': [
                                 {
                                     'userEnteredValue': {
-                                        'formulaValue': formulas[symbol][1]
+                                        'formulaValue': formulas[symbol][2]
                                     },
                                     'userEnteredFormat': {
                                         'numberFormat':{
@@ -293,7 +244,6 @@ response_date = sheet_service.spreadsheets().values().update(
         majorDimension = 'ROWS',
         values = sheet_input_df.T.reset_index().T.values.tolist())
 ).execute()
-'''
 request_body_cond = {
     'requests':[
         {
@@ -301,55 +251,51 @@ request_body_cond = {
                 'rule': {
                     'ranges':[
                         {
-                            "sheetId": sheet03_id,
-                            "startRowIndex": 4,
-                            "endRowIndex": 5,
-                            "startColumnIndex": 2,
-                            "endColumnIndex": len(symbols.values())+1
+                            "sheetId": sheet04_id,
+                            "startRowIndex": 2,
+                            "endRowIndex": 23,
+                            "startColumnIndex": 5,
+                            "endColumnIndex": 6
                         }
                     ],
                     'gradientRule':{
                         "minpoint": {
                             "color": {
-                                "red": 255,
+                                "red": 0.3,
                                 "green": 0,
                                 "blue": 0,
-                                "alpha": 0.5
+                                "alpha": 0.3
                             },
                             "type":"MIN" 
                         },
                         "midpoint": {
                             "color": {
-                                "red": 255,
-                                "green": 255,
-                                "blue": 255,
+                                "red": 1,
+                                "green": 1,
+                                "blue": 1,
                                 "alpha": 1
                             },
                             "type": "PERCENT" ,
-                            "value": "50"
+                            "value": "75"
                         },
                         "maxpoint": {
                             "color": {
                                 "red": 0,
-                                "green": 255,
-                                "blue": 0,  
+                                "green": 1,
+                                "blue": 0.2,  
                                 "alpha": 1
                             },
                             "type": "MAX" 
                         }
                     }
                 },
-                'index': 4
+                'index': 0
             }
         }
     ]
 }
 
-response_date = sheet_service.spreadsheets().batchUpdate(
-        spreadsheetId = file_id,
-        body = request_body_cond
-).execute()
-'''
+
 def formatCells(startR, endR, startC, endC, sheetid, colors):
     request_body_format_cells = {
         'requests': [
@@ -593,6 +539,12 @@ response_date = sheet_service.spreadsheets().batchUpdate(
     spreadsheetId = file_id,
     body = request_body_sharpe_col
 ).execute()
+
+response_date = sheet_service.spreadsheets().batchUpdate(
+        spreadsheetId = file_id,
+        body = request_body_cond
+).execute()
+
 
 
 
@@ -858,6 +810,12 @@ request_body_clear = {
                 'range':{
                     'sheetId': sheet04_id,
                 }
+            }
+        },
+        {
+            'deleteConditionalFormatRule':{
+                'index': 0,
+                'sheetId': sheet04_id
             }
         }
     ]
