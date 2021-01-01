@@ -6,6 +6,10 @@ sheet02_id = '258515976'
 sheet03_id = '1912114963'
 sheet04_id = '925438975'
 
+sheet01_name = 'Historic Prices'
+sheet02_name = 'Returns'
+sheet03_name = 'Risk-Returns'
+sheet04_name = 'Final Report'
 
 CLIENT_SECRET_FILE_DRIVE = 'client_secret_drive.json'
 CLIENT_SECRET_FILE_SHEET = 'client_secret_sheets.json'
