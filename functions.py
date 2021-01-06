@@ -6,15 +6,18 @@ import pandas as pd
 from ids import *
 import datetime
 
-def dates_bwn_twodates(start_date, end_date):
-    for n in range(int ((end_date - start_date).days)):
-        yield start_date + datetime.timedelta(n)
-def list_dates(days_length):
-    sdate = datetime.date(2011,1,1)
-    edate = datetime.date(2021,1,1)
-    datelist = list(reversed([str(d) for d in dates_bwn_twodates(sdate,edate)]))[:days_length]
-    dates = {'Date':datelist}
-    return dates
+def list_dates(days_length,symbol):
+    url = "https://query1.finance.yahoo.com/v7/finance/download/" + symbol + "?period1=1293840000&period2=1609459200&interval=1d&events=history&includeAdjustedClose=true"
+    stock_price = pd.read_csv(url, skiprows = 0)
+    new_set = stock_price['Date']
+    new_set = dict(new_set.iloc[::-1])
+    date = {
+        'Date':[]
+    }
+    for i in new_set.values():
+        date['Date'].append(i)
+    date['Date'] = date['Date'][:days_length]
+    return date
 def createstock(symbol, sheet, sheet2, sheet3, columnIndex, file_id, service,sheet2_id,sheet3_id,days):
     columns = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
     column = columns[columnIndex]

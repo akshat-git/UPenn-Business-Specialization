@@ -10,11 +10,11 @@ This file contains the main code
 
 colors = {
     'red':          [1,0,0,1],
-    'lightred':     [1,0,0,0.3],
+    'lightred':     [0.5,0,0,0.1],
     'blue':         [0,0,1,1],
-    'lightblue':    [0,0,1,0.3],
+    'lightblue':    [0,0,0.5,0.1],
     'green':        [0,1,0,1],
-    'lightgreen':   [0,1,0,0.3],
+    'lightgreen':   [0,0.5,0,0.1],
     'white':        [1,1,1,1],
 }
 
@@ -37,23 +37,22 @@ API_VERSION_SHEET = 'v4'
 drive_service = Create_Service(CLIENT_SECRET_FILE_DRIVE, API_NAME_DRIVE, API_VERSION_DRIVE, SCOPES)
 sheet_service = Create_Service(CLIENT_SECRET_FILE_SHEET, API_NAME_SHEET, API_VERSION_SHEET, SCOPES)
 
-
-
 # =============================================================================
 # File and tickers
 
 symbolin1 = input('Ticker Input: ')
 symbolin2 = input('Ticker Input: ')
-
+symbolin3 = input('Ticker Input: ')
+symbolin4 = input('Ticker Input: ')
 symbols = {
     "symbol01" : symbolin1, 
-    "symbol02" : symbolin2
+    "symbol02" : symbolin2,
+    "symbol03" : symbolin3, 
+    "symbol04" : symbolin4
+
 }
 days = int(input("Working days: "))
 skiprows = 0
-
-
-
 
 # =============================================================================
 # Names sheet 03
@@ -77,23 +76,15 @@ response_date = sheet_service.spreadsheets().values().update(
 # formatCells(startR, endR, startC, endC, sheetid, colors)
 # formatCells(2, 5, 1, 2, sheet03_id, lightblue)
 
-# conditional(sheet_id, colormin, colormid, colormax, startR, endR, startC, endC)
-conditional(sheet04_id, 4, colors['white'], colors['lightgreen'], colors['green'], 2, 23, 5, 6, sheet_service)
+# conditional(sheet_id, percentile, colormin, colormid, colormax, startR, endR, startC, endC, service)
+conditional(sheet04_id, 99.99, colors['white'], colors['lightgreen'], colors['green'], 2, 23, 5, 6, sheet_service)
 
-date_col = list_dates(days)
+date_col = list_dates(days,symbolin1)
 date_df = pd.DataFrame.from_dict(date_col)
 response_date = sheet_service.spreadsheets().values().update(
     spreadsheetId = file_id,
     valueInputOption = 'USER_ENTERED',
     range = sheet01_name+'!A2',
-    body = dict(
-        majorDimension = 'ROWS',
-        values = date_df.T.reset_index().T.values.tolist())
-).execute()
-response_date = sheet_service.spreadsheets().values().update(
-    spreadsheetId = file_id,
-    valueInputOption = 'USER_ENTERED',
-    range = sheet02_name+'!A3',
     body = dict(
         majorDimension = 'ROWS',
         values = date_df.T.reset_index().T.values.tolist())
