@@ -224,7 +224,8 @@ if draw_chart == 'y':
         body = request_body
     ).execute()
 
-# chart_id = chart_prop['replies'][0]['addChart']['chart']['chartId']
+chart_id = chart_prop['replies'][0]['addChart']['chart']['chartId']
+
 # =============================================================================
 
 # =============================================================================
@@ -232,4 +233,20 @@ if draw_chart == 'y':
 clear_sheet = input("Clear Sheet? ")
 if clear_sheet == 'y':
     sheetclear(sheet_service)
+
+    # Routine to delete the embedded chart created in the previous step
+    request_body = {
+        'requests': [
+            {
+                'deleteEmbeddedObject': {
+                    'objectId': chart_id
+                }
+            }
+        ]
+    }
+
+    chart_prop = sheet_service.spreadsheets().batchUpdate(
+        spreadsheetId=file_id,
+        body = request_body
+    ).execute()
 # =============================================================================
