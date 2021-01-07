@@ -220,7 +220,7 @@ def formatCells(startR, endR, startC, endC, sheetid, colors):
         spreadsheetId = file_id,
         body = request_body_format_cells
     ).execute()
-def sheetclear(service):
+def sheetclear(service,chartid):
     request_body_clear = {
         'requests':[
             {
@@ -260,6 +260,11 @@ def sheetclear(service):
                 'deleteConditionalFormatRule':{
                     'index': 0,
                     'sheetId': sheet04_id
+                }
+            },
+            {
+                'deleteEmbeddedObject': {
+                    'objectId': chartid
                 }
             }
         ]
@@ -505,3 +510,105 @@ def sheet04(sheet02_name, sheet03_name, sheet04_name, sheet04_id, file_id,symbol
         spreadsheetId = file_id,
         body = request_body_sharpe_col
     ).execute()
+def chart_draw(service, sheet_id):
+    request_body = {
+        'requests': [
+            {
+                'addChart': {
+                    'chart': {
+                        'spec': {
+                            'title': 'Stock Performance',
+                            'basicChart': {
+                                'chartType': 'LINE',
+                                'legendPosition': 'BOTTOM_LEGEND',
+                                'axis': [
+                                    # x-axis
+                                    {
+                                        'position': "BOTTOM_AXIS",
+                                        'title': 'Standard Deviation'
+                                    },
+                                    # y-axis
+                                    {
+                                        'position': "LEFT_AXIS",
+                                        'title': 'Stock Returns'
+                                    }
+                                ],
+                                # Chart data
+                                'domains':[
+                                    {
+                                        'domain':{
+                                            'sourceRange':{
+                                                'sources':[
+                                                    {
+                                                    'sheetId': sheet_id,
+                                                        'startRowIndex': 2, # Row # 1
+                                                        'endRowIndex': 23, # Row # 10
+                                                        'startColumnIndex': 3, # column B
+                                                        'endColumnIndex': 4 
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                'series': [
+                                    {
+                                        'series': {
+                                            'sourceRange': {
+                                                'sources': [
+                                                    {
+                                                        'sheetId': sheet_id,
+                                                        'startRowIndex': 2, # Row # 1
+                                                        'endRowIndex': 23, # Row # 10
+                                                        'startColumnIndex': 4, # column B
+                                                        'endColumnIndex': 5
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        'targetAxis': 'LEFT_AXIS',                                    
+                                    }
+                                    # {
+                                    #     'series': {
+                                    #         'sourceRange': {
+                                    #             'sources': [
+                                    #                 {
+                                    #                     'sheetId': sheet_id,
+                                    #                     'startRowIndex': 2, # Row # 1
+                                    #                     'endRowIndex': 4, # Row # 10
+                                    #                     'startColumnIndex': 6, # column B
+                                    #                     'endColumnIndex': 7
+                                    #                 }
+                                    #             ]
+                                    #         }
+                                    #     },
+                                    #     'targetAxis': 'LEFT_AXIS',                                    
+                                    # }
+                                ]
+                            }
+                        },
+                        'position': {
+                            'overlayPosition': {
+                                'anchorCell': {
+                                    'sheetId': sheet_id,
+                                    'rowIndex': 1,
+                                    'columnIndex': 1
+                                },
+                                'offsetXPixels': 506,
+                                'offsetYPixels': 21,
+                                'widthPixels': 800,
+                                'heightPixels': 466
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+    chart_prop = sheet_service.spreadsheets().batchUpdate(
+            spreadsheetId = file_id,
+            body = request_body
+    ).execute()
+    chartidnew = chart_prop['replies'][0]['addChart']['chart']['chartId']
+    return chartidnew
+
