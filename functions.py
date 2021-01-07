@@ -188,17 +188,17 @@ def createstock(symbol, sheet, sheet2, sheet3, columnIndex, file_id, service,she
             majorDimension = 'ROWS',
             values = sheet_input_df.T.reset_index().T.values.tolist())
     ).execute()
-def formatCells(startR, endR, startC, endC, sheetid, colors):
+def formatCells(range, sheetid, colors):
     request_body_format_cells = {
         'requests': [
             {
                 'repeatCell': {
                     'range': {
                             'sheetId': sheetid,
-                            'startRowIndex': startR,
-                            'endRowIndex': endR,
-                            'startColumnIndex': startC,
-                            'endColumnIndex': endC
+                            "startRowIndex": range[0],
+                            "endRowIndex": range[1],
+                            "startColumnIndex": range[2],
+                            "endColumnIndex": range[3]
                     },
                     'cell': {
                         'userEnteredFormat': {
@@ -273,7 +273,7 @@ def sheetclear(service,chartid):
         spreadsheetId = file_id,
         body = request_body_clear
     ).execute()
-def conditional(sheet_id, percentile, colormin, colormid, colormax, startR, endR, startC, endC, sheet_service):
+def conditional(sheet_id, percentile, colormin, colormid, colormax, range, sheet_service):
     request_body_cond = {
         'requests':[
             {
@@ -281,11 +281,11 @@ def conditional(sheet_id, percentile, colormin, colormid, colormax, startR, endR
                     'rule': {
                         'ranges':[
                             {
-                                "sheetId": sheet04_id,
-                                "startRowIndex": startR,
-                                "endRowIndex": endR,
-                                "startColumnIndex": startC,
-                                "endColumnIndex": endC
+                                "sheetId": sheet_id,
+                                "startRowIndex": range[0],
+                                "endRowIndex": range[1],
+                                "startColumnIndex": range[2],
+                                "endColumnIndex": range[3]
                             }
                         ],
                         'gradientRule':{
@@ -510,7 +510,7 @@ def sheet04(sheet02_name, sheet03_name, sheet04_name, sheet04_id, file_id,symbol
         spreadsheetId = file_id,
         body = request_body_sharpe_col
     ).execute()
-def chart_draw(service, sheet_id):
+def chart_draw(service, sheet_id, domain, series,type):
     request_body = {
         'requests': [
             {
@@ -519,7 +519,7 @@ def chart_draw(service, sheet_id):
                         'spec': {
                             'title': 'Stock Performance',
                             'basicChart': {
-                                'chartType': 'LINE',
+                                'chartType': type,
                                 'legendPosition': 'BOTTOM_LEGEND',
                                 'axis': [
                                     # x-axis
@@ -541,10 +541,10 @@ def chart_draw(service, sheet_id):
                                                 'sources':[
                                                     {
                                                     'sheetId': sheet_id,
-                                                        'startRowIndex': 2, # Row # 1
-                                                        'endRowIndex': 23, # Row # 10
-                                                        'startColumnIndex': 3, # column B
-                                                        'endColumnIndex': 4 
+                                                        'startRowIndex': domain[0], # Row # 1
+                                                        'endRowIndex': domain[1], # Row # 10
+                                                        'startColumnIndex': domain[2], # column B
+                                                        'endColumnIndex': domain[3]
                                                     }
                                                 ]
                                             }
@@ -558,10 +558,10 @@ def chart_draw(service, sheet_id):
                                                 'sources': [
                                                     {
                                                         'sheetId': sheet_id,
-                                                        'startRowIndex': 2, # Row # 1
-                                                        'endRowIndex': 23, # Row # 10
-                                                        'startColumnIndex': 4, # column B
-                                                        'endColumnIndex': 5
+                                                        'startRowIndex': series[0], # Row # 1
+                                                        'endRowIndex': series[1], # Row # 10
+                                                        'startColumnIndex': series[2], # column B
+                                                        'endColumnIndex': series[3]
                                                     }
                                                 ]
                                             }
@@ -605,7 +605,7 @@ def chart_draw(service, sheet_id):
             }
         ]
     }
-    chart_prop = sheet_service.spreadsheets().batchUpdate(
+    chart_prop = service.spreadsheets().batchUpdate(
             spreadsheetId = file_id,
             body = request_body
     ).execute()

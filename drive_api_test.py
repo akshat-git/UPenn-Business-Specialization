@@ -17,6 +17,13 @@ colors = {
     'lightgreen':   [0,0.5,0,0.1],
     'white':        [1,1,1,1],
 }
+named_ranges = {
+    'stdev':[2,23,3,4],
+    'returns':[2,23,4,5],
+    'sharpe':[2,23,5,6]
+}
+
+
 
 from Google import Create_Service
 import pandas as pd
@@ -73,11 +80,11 @@ response_date = sheet_service.spreadsheets().values().update(
 
 
 
-# formatCells(startR, endR, startC, endC, sheetid, colors)
-# formatCells(2, 5, 1, 2, sheet03_id, lightblue)
+# formatCells(range, sheetid, colors)
+# formatCells(range, sheet03_id, lightblue)
 
-# conditional(sheet_id, percentile, colormin, colormid, colormax, startR, endR, startC, endC, service)
-conditional(sheet04_id, 99.99, colors['white'], colors['lightgreen'], colors['green'], 2, 23, 5, 6, sheet_service)
+# conditional(sheet_id, percentile, colormin, colormid, colormax, range, service)
+conditional(sheet04_id, 99.99, colors['white'], colors['lightgreen'], colors['green'],named_ranges['sharpe'], sheet_service)
 
 date_col = list_dates(days,symbolin1)
 date_df = pd.DataFrame.from_dict(date_col)
@@ -122,7 +129,8 @@ response_date = sheet_service.spreadsheets().values().update(
 
 draw_chart = 'y' #input("Draw chart? :")
 if draw_chart == 'y':
-    chart_id = chart_draw(sheet_service, sheet04_id)
+    #chart_draw(service, sheet_id, domain, series,type)
+    chart_id = chart_draw(sheet_service, sheet04_id,named_ranges['stdev'],named_ranges['returns'],'LINE')
 
 # =============================================================================
 
