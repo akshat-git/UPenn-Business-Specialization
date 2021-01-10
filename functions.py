@@ -525,7 +525,10 @@ def chart_draw(service, sheet_id, domain, series,type):
                                     # x-axis
                                     {
                                         'position': "BOTTOM_AXIS",
-                                        'title': 'Standard Deviation'
+                                        'title': 'Standard Deviation',
+                                        'viewWindowOptions': {
+                                            'viewWindowMin': 0
+                                        }
                                     },
                                     # y-axis
                                     {
