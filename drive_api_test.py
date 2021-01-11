@@ -135,6 +135,8 @@ if draw_chart == 'y':
     #chart_draw(service, sheet_id, domain, series,type)
     chart_id = chart_draw(sheet_service, sheet04_id,named_ranges['stdev'],named_ranges['returns'],'LINE')
     chart_id_bubble = chart_draw_bubble(sheet_service, sheet03_id)
+
+
 # =============================================================================
 
 # =============================================================================
@@ -142,5 +144,7 @@ if draw_chart == 'y':
 clear_sheet = input("Clear Sheet? ")
 if clear_sheet == 'y':
     sheetclear(sheet_service, chart_id)
-    sheetclear(sheet_service, chart_id_bubble)
+    if draw_chart = 'y':
+        sheetclear(sheet_service, chart_id_bubble)
+
 # =============================================================================
