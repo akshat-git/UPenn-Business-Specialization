@@ -48,8 +48,10 @@ sheet_service = Create_Service(CLIENT_SECRET_FILE_SHEET, API_NAME_SHEET, API_VER
 # File and tickers
 
 # importform(service, spreadsheet_id,range):
-symbollist = importform(sheet_service,file_id, "'Form Responses 1'!B2:E2")['values'][0]
-print(symbollist)
+
+symbollistmain = importform(sheet_service,file_id, "'Form Responses 1'!B2:E")['values']
+symbollist = symbollistmain[len(symbollistmain)-1]
+
 symbolin1 = 'FB'    #input('Ticker Input: ')
 symbolin2 = 'ZM'    #input('Ticker Input: ')
 symbolin3 = 'TSLA'  #input('Ticker Input: ')
@@ -63,7 +65,18 @@ symbols = {
 }
 days = 100 #int(input("Working days: "))
 skiprows = 0
-
+done = {
+    1:['']
+}
+donedf = pd.DataFrame.from_dict(done)
+response_date = sheet_service.spreadsheets().values().update(
+    spreadsheetId = file_id,
+    valueInputOption = 'USER_ENTERED',
+    range = sheet03_name+'!H'+str(len(symbollistmain)-1),
+    body = dict(
+        majorDimension = 'ROWS',
+        values = donedf.T.reset_index().T.values.tolist())
+).execute()
 # =============================================================================
 # Names sheet 03
 names = {
@@ -144,7 +157,7 @@ if draw_chart == 'y':
 clear_sheet = input("Clear Sheet? ")
 if clear_sheet == 'y':
     sheetclear(sheet_service, chart_id)
-    if draw_chart = 'y':
+    if draw_chart == 'y':
         sheetclear(sheet_service, chart_id_bubble)
 
 # =============================================================================
