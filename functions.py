@@ -6,6 +6,11 @@ import pandas as pd
 from ids import *
 import datetime
 
+
+def importform(service, spreadsheet_id,range):
+    request = service.spreadsheets().values().get(spreadsheetId=spreadsheet_id, range=range, majorDimension='ROWS')
+    response = request.execute()
+    return response
 def list_dates(days_length,symbol):
     url = "https://query1.finance.yahoo.com/v7/finance/download/" + symbol + "?period1=1293840000&period2=1609459200&interval=1d&events=history&includeAdjustedClose=true"
     stock_price = pd.read_csv(url, skiprows = 0)
@@ -188,17 +193,17 @@ def createstock(symbol, sheet, sheet2, sheet3, columnIndex, file_id, service,she
             majorDimension = 'ROWS',
             values = sheet_input_df.T.reset_index().T.values.tolist())
     ).execute()
-def formatCells(startR, endR, startC, endC, sheetid, colors):
+def formatCells(range, sheetid, colors):
     request_body_format_cells = {
         'requests': [
             {
                 'repeatCell': {
                     'range': {
                             'sheetId': sheetid,
-                            'startRowIndex': startR,
-                            'endRowIndex': endR,
-                            'startColumnIndex': startC,
-                            'endColumnIndex': endC
+                            "startRowIndex": range[0],
+                            "endRowIndex": range[1],
+                            "startColumnIndex": range[2],
+                            "endColumnIndex": range[3]
                     },
                     'cell': {
                         'userEnteredFormat': {
@@ -220,7 +225,7 @@ def formatCells(startR, endR, startC, endC, sheetid, colors):
         spreadsheetId = file_id,
         body = request_body_format_cells
     ).execute()
-def sheetclear(service):
+def sheetclear(service,chartid):
     request_body_clear = {
         'requests':[
             {
@@ -261,6 +266,11 @@ def sheetclear(service):
                     'index': 0,
                     'sheetId': sheet04_id
                 }
+            },
+            {
+                'deleteEmbeddedObject': {
+                    'objectId': chartid
+                }
             }
         ]
     }
@@ -268,7 +278,7 @@ def sheetclear(service):
         spreadsheetId = file_id,
         body = request_body_clear
     ).execute()
-def conditional(sheet_id, percentile, colormin, colormid, colormax, startR, endR, startC, endC, sheet_service):
+def conditional(sheet_id, percentile, colormin, colormid, colormax, range, sheet_service):
     request_body_cond = {
         'requests':[
             {
@@ -276,11 +286,11 @@ def conditional(sheet_id, percentile, colormin, colormid, colormax, startR, endR
                     'rule': {
                         'ranges':[
                             {
-                                "sheetId": sheet04_id,
-                                "startRowIndex": startR,
-                                "endRowIndex": endR,
-                                "startColumnIndex": startC,
-                                "endColumnIndex": endC
+                                "sheetId": sheet_id,
+                                "startRowIndex": range[0],
+                                "endRowIndex": range[1],
+                                "startColumnIndex": range[2],
+                                "endColumnIndex": range[3]
                             }
                         ],
                         'gradientRule':{
@@ -505,3 +515,207 @@ def sheet04(sheet02_name, sheet03_name, sheet04_name, sheet04_id, file_id,symbol
         spreadsheetId = file_id,
         body = request_body_sharpe_col
     ).execute()
+def chart_draw(service, sheet_id, domain, series,type):
+    request_body = {
+        'requests': [
+            {
+                'addChart': {
+                    'chart': {
+                        'spec': {
+                            'title': 'Stock Performance',
+                            'basicChart': {
+                                'chartType': type,
+                                'legendPosition': 'BOTTOM_LEGEND',
+                                'axis': [
+                                    # x-axis
+                                    {
+                                        'position': "BOTTOM_AXIS",
+                                        'title': 'Standard Deviation',
+                                        'viewWindowOptions': {
+                                            'viewWindowMin': 0
+                                        }
+                                    },
+                                    # y-axis
+                                    {
+                                        'position': "LEFT_AXIS",
+                                        'title': 'Stock Returns'
+                                    }
+                                ],
+                                # Chart data
+                                'domains':[
+                                    {
+                                        'domain':{
+                                            'sourceRange':{
+                                                'sources':[
+                                                    {
+                                                    'sheetId': sheet_id,
+                                                        'startRowIndex': domain[0], # Row # 1
+                                                        'endRowIndex': domain[1], # Row # 10
+                                                        'startColumnIndex': domain[2], # column B
+                                                        'endColumnIndex': domain[3]
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                'series': [
+                                    {
+                                        'series': {
+                                            'sourceRange': {
+                                                'sources': [
+                                                    {
+                                                        'sheetId': sheet_id,
+                                                        'startRowIndex': series[0], # Row # 1
+                                                        'endRowIndex': series[1], # Row # 10
+                                                        'startColumnIndex': series[2], # column B
+                                                        'endColumnIndex': series[3]
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        'targetAxis': 'LEFT_AXIS',                                    
+                                    }
+                                    # {
+                                    #     'series': {
+                                    #         'sourceRange': {
+                                    #             'sources': [
+                                    #                 {
+                                    #                     'sheetId': sheet_id,
+                                    #                     'startRowIndex': 2, # Row # 1
+                                    #                     'endRowIndex': 4, # Row # 10
+                                    #                     'startColumnIndex': 6, # column B
+                                    #                     'endColumnIndex': 7
+                                    #                 }
+                                    #             ]
+                                    #         }
+                                    #     },
+                                    #     'targetAxis': 'LEFT_AXIS',                                    
+                                    # }
+                                ]
+                            }
+                        },
+                        'position': {
+                            'overlayPosition': {
+                                'anchorCell': {
+                                    'sheetId': sheet_id,
+                                    'rowIndex': 1,
+                                    'columnIndex': 1
+                                },
+                                'offsetXPixels': 506,
+                                'offsetYPixels': 21,
+                                'widthPixels': 800,
+                                'heightPixels': 466
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+    chart_prop = service.spreadsheets().batchUpdate(
+            spreadsheetId = file_id,
+            body = request_body
+    ).execute()
+    chartidnew = chart_prop['replies'][0]['addChart']['chart']['chartId']
+    return chartidnew
+def chart_draw_bubble(service, sheet_id):
+    request_body_bubble = {
+        'requests': [
+            {
+                'addChart': {
+                    'chart': {
+                        'spec': {
+                            'title': 'Reward versus Risk',
+                            'bubbleChart': {
+                                'legendPosition': 'BOTTOM_LEGEND',
+                                # Chart data
+                                'domain': {
+                                    # X axis values
+                                    'sourceRange':{
+                                        'sources':[
+                                            {
+                                                'sheetId': sheet_id,
+                                                'startRowIndex': 3, # Row # 1
+                                                'endRowIndex':4, # Row # 10
+                                                'startColumnIndex': 2, # column B
+                                                'endColumnIndex': 6
+                                            }
+                                        ]
+                                    }
+                                },
+                                # Y axis values
+                                'series': {
+                                    'sourceRange': {
+                                        'sources': [
+                                            {
+                                                'sheetId': sheet_id,
+                                                'startRowIndex': 2, # Row # 1
+                                                'endRowIndex': 3, # Row # 10
+                                                'startColumnIndex': 2, # column B
+                                                'endColumnIndex': 6
+                                            }
+                                        ]
+                                    }
+                                },
+                                'bubbleLabels': {
+                                    'sourceRange': {
+                                        'sources': [
+                                            {
+                                                'sheetId': sheet_id,
+                                                'startRowIndex': 1, # Row # 1
+                                                'endRowIndex': 2, # Row # 10
+                                                'startColumnIndex': 2, # column B
+                                                'endColumnIndex': 6
+                                            }
+                                        ]
+                                    }
+                                },
+                                'bubbleOpacity': 0.75,
+                                'bubbleBorderColorStyle': {
+                                    'rgbColor': {
+                                        'red': 0,
+                                        'green': 0,
+                                        'blue': 0,
+                                        'alpha': 1
+                                    }
+                                },
+                                'bubbleMinRadiusSize': 20,
+                                'bubbleMaxRadiusSize': 20,
+                                "bubbleTextStyle": {
+                                    "foregroundColor": {
+                                        'red':1,
+                                        'green':1,
+                                        'blue':1,
+                                        'alpha':1
+                                    },
+                                    "fontFamily": 'Comic Sans',
+                                    "fontSize": 12,
+                                    "bold": True
+                                }
+                            }
+                        },
+                        'position': {
+                            'overlayPosition': {
+                                'anchorCell': {
+                                    'sheetId': sheet_id,
+                                    'rowIndex': 1,
+                                    'columnIndex': 1
+                                },
+                                'offsetXPixels': 0,
+                                'offsetYPixels': 107,
+                                'widthPixels': 510,
+                                'heightPixels': 400
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+    chart_prop = service.spreadsheets().batchUpdate(
+            spreadsheetId = file_id,
+            body = request_body_bubble
+    ).execute()
+    chartidnew = chart_prop['replies'][0]['addChart']['chart']['chartId']
+    return chartidnew

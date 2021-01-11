@@ -17,6 +17,13 @@ colors = {
     'lightgreen':   [0,0.5,0,0.1],
     'white':        [1,1,1,1],
 }
+named_ranges = {
+    'stdev':[2,23,3,4],
+    'returns':[2,23,4,5],
+    'sharpe':[2,23,5,6]
+}
+
+
 
 from Google import Create_Service
 import pandas as pd
@@ -40,18 +47,21 @@ sheet_service = Create_Service(CLIENT_SECRET_FILE_SHEET, API_NAME_SHEET, API_VER
 # =============================================================================
 # File and tickers
 
-symbolin1 = input('Ticker Input: ')
-symbolin2 = input('Ticker Input: ')
-symbolin3 = input('Ticker Input: ')
-symbolin4 = input('Ticker Input: ')
+# importform(service, spreadsheet_id,range):
+symbollist = importform(sheet_service,file_id, "'Form Responses 1'!B2:E2")['values'][0]
+print(symbollist)
+symbolin1 = 'FB'    #input('Ticker Input: ')
+symbolin2 = 'ZM'    #input('Ticker Input: ')
+symbolin3 = 'TSLA'  #input('Ticker Input: ')
+symbolin4 = 'WFC'   #input('Ticker Input: ')
 symbols = {
-    "symbol01" : symbolin1, 
-    "symbol02" : symbolin2,
-    "symbol03" : symbolin3, 
-    "symbol04" : symbolin4
+    "symbol01" : symbollist[0], 
+    "symbol02" : symbollist[1],
+    "symbol03" : symbollist[2], 
+    "symbol04" : symbollist[3]
 
 }
-days = int(input("Working days: "))
+days = 100 #int(input("Working days: "))
 skiprows = 0
 
 # =============================================================================
@@ -73,11 +83,11 @@ response_date = sheet_service.spreadsheets().values().update(
 
 
 
-# formatCells(startR, endR, startC, endC, sheetid, colors)
-# formatCells(2, 5, 1, 2, sheet03_id, lightblue)
+# formatCells(range, sheetid, colors)
+# formatCells(range, sheet03_id, lightblue)
 
-# conditional(sheet_id, percentile, colormin, colormid, colormax, startR, endR, startC, endC, service)
-conditional(sheet04_id, 99.99, colors['white'], colors['lightgreen'], colors['green'], 2, 23, 5, 6, sheet_service)
+# conditional(sheet_id, percentile, colormin, colormid, colormax, range, service)
+conditional(sheet04_id, 99.99, colors['white'], colors['lightgreen'], colors['green'],named_ranges['sharpe'], sheet_service)
 
 date_col = list_dates(days,symbolin1)
 date_df = pd.DataFrame.from_dict(date_col)
@@ -120,116 +130,17 @@ response_date = sheet_service.spreadsheets().values().update(
 # =============================================================================
 # Plot chart
 
-sheet_id = sheet04_id
-request_body = {
-    'requests': [
-        {
-            'addChart': {
-                'chart': {
-                    'spec': {
-                        'title': 'Stock Performance',
-                        'basicChart': {
-                            'chartType': 'LINE',
-                            'legendPosition': 'BOTTOM_LEGEND',
-                            'axis': [
-                                # x-axis
-                                {
-                                    'position': "BOTTOM_AXIS",
-                                    'title': 'Standard Deviation'
-                                },
-                                # y-axis
-                                {
-                                    'position': "LEFT_AXIS",
-                                    'title': 'Stock Returns'
-                                }
-                            ],
-                            # Chart data
-                            'domains':[
-                                {
-                                    'domain':{
-                                        'sourceRange':{
-                                            'sources':[
-                                                {
-                                                   'sheetId': sheet_id,
-                                                    'startRowIndex': 2, # Row # 1
-                                                    'endRowIndex': 23, # Row # 10
-                                                    'startColumnIndex': 3, # column B
-                                                    'endColumnIndex': 4 
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ],
-                            'series': [
-                                {
-                                    'series': {
-                                        'sourceRange': {
-                                            'sources': [
-                                                {
-                                                    'sheetId': sheet_id,
-                                                    'startRowIndex': 2, # Row # 1
-                                                    'endRowIndex': 23, # Row # 10
-                                                    'startColumnIndex': 4, # column B
-                                                    'endColumnIndex': 5
-                                                }
-                                            ]
-                                        }
-                                    },
-                                    'targetAxis': 'LEFT_AXIS',                                    
-                                }
-                                # {
-                                #     'series': {
-                                #         'sourceRange': {
-                                #             'sources': [
-                                #                 {
-                                #                     'sheetId': sheet_id,
-                                #                     'startRowIndex': 2, # Row # 1
-                                #                     'endRowIndex': 4, # Row # 10
-                                #                     'startColumnIndex': 6, # column B
-                                #                     'endColumnIndex': 7
-                                #                 }
-                                #             ]
-                                #         }
-                                #     },
-                                #     'targetAxis': 'LEFT_AXIS',                                    
-                                # }
-                            ]
-                        }
-                    },
-                    'position': {
-                        'overlayPosition': {
-                            'anchorCell': {
-                                'sheetId': sheet_id,
-                                'rowIndex': 1,
-                                'columnIndex': 1
-                            },
-                            'offsetXPixels': 506,
-                            'offsetYPixels': 21,
-                            'widthPixels': 800,
-                            'heightPixels': 466
-                        }
-                     }
-                }
-            }
-        }
-    ]
-}
-
-
 draw_chart = 'y' #input("Draw chart? :")
 if draw_chart == 'y':
-    chart_prop = sheet_service.spreadsheets().batchUpdate(
-        spreadsheetId=file_id,
-        body = request_body
-    ).execute()
-
-# chart_id = chart_prop['replies'][0]['addChart']['chart']['chartId']
+    #chart_draw(service, sheet_id, domain, series,type)
+    chart_id = chart_draw(sheet_service, sheet04_id,named_ranges['stdev'],named_ranges['returns'],'LINE')
+    chart_id_bubble = chart_draw_bubble(sheet_service, sheet03_id)
 # =============================================================================
 
 # =============================================================================
 # End of program. Should I clear the sheet?
 clear_sheet = input("Clear Sheet? ")
 if clear_sheet == 'y':
-    sheetclear(sheet_service)
+    sheetclear(sheet_service, chart_id)
+    sheetclear(sheet_service, chart_id_bubble)
 # =============================================================================
