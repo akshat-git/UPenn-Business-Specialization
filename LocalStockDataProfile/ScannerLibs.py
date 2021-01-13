@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import SharpeCalc
+import CommonStocks
 
 def Reverse(lst): 
     return [ele for ele in reversed(lst)] 
@@ -85,7 +86,3 @@ def project_compare_stocks(tickers, bd, sd, dph = 180):
             hs_risk = tickers[i]
             hs_risk_ret = lr_ret
     return hs_proj, hs_sharpe, hs_risk
-
-
-stock_list = ['AAPL', 'MSFT', 'ZM', 'TSLA', 'UAL', 'AAL', 'BA', 'SPLK', 'INTC', 'GOOG']
-print(project_compare_stocks(stock_list, 0, 18, 180))
