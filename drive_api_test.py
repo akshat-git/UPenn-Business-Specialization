@@ -13,7 +13,7 @@ import pandas as pd
 from ids import *
 from functions import *
 import datetime
-
+import time
 # =============================================================================
 # Start drive related services
 API_NAME_DRIVE = 'drive'
@@ -46,7 +46,7 @@ named_ranges = {
     'returns':[2,23,4,5],
     'sharpe':[2,23,5,6]
 }
-
+'''
 # Mark the record as done reading
 def MarkDone(sheet_service, file_id, symbollistmain, sheet): 
     # Mark as done
@@ -63,7 +63,7 @@ def MarkDone(sheet_service, file_id, symbollistmain, sheet):
             majorDimension = 'ROWS',
             values = donedf.T.reset_index().T.values.tolist())
     ).execute()
-
+'''
 # Read historical data and process
 def ReadHistDataAndProcess(sheet01name, sheet02name, sheet03name, fileid, sheetservice, sheet02id, sheet03id, days, symboldate, symbols):
     j = 1
@@ -82,7 +82,6 @@ def ReadHistDataAndProcess(sheet01name, sheet02name, sheet03name, fileid, sheets
             majorDimension = 'ROWS',
             values = date_df.T.reset_index().T.values.tolist())
     ).execute()
-
 # Create Return-Risk Names
 def CreateRiskReturnNames(sheetservice, fileid, sheet03name):
     names = {
@@ -97,7 +96,6 @@ def CreateRiskReturnNames(sheetservice, fileid, sheet03name):
             majorDimension = 'ROWS',
             values = sheet_input_df.T.reset_index().T.values.tolist())
     ).execute()
-
 # Create Final Return(Sharpe Ratio chart)
 def CreateFinalReportSheet(sheetservice, fileid, sheet04id, colors, namedranges, days, sheet02name, sheet03name, sheet04name, symbols):
     # conditional(sheet_id, percentile, colormin, colormid, colormax, range, service)
@@ -105,7 +103,20 @@ def CreateFinalReportSheet(sheetservice, fileid, sheet04id, colors, namedranges,
 
     # sheet04(sheet02_name, sheet03_name, sheet04_name, sheet04_id, file_id)
     sheet04(sheet02name, sheet03name, sheet04name, sheet04id, fileid, symbols, sheetservice, days)
-
+# Write Proccessed Data Count
+def Processed(len):
+    processed = {
+        'Queries': [len]
+    }
+    df = pd.DataFrame.from_dict(processed)
+    response_date = sheet_service.spreadsheets().values().update(
+        spreadsheetId = file_id,
+        valueInputOption = 'USER_ENTERED',
+        range = "'PersistentData'!B2",
+        body = dict(
+            majorDimension = 'COLUMNS',
+            values = df.T.reset_index().T.values.tolist())
+    ).execute()
 
 # EXPERIMENTAL CODE
 '''
@@ -125,42 +136,68 @@ response_date = sheet_service.spreadsheets().values().update(
 ).execute()
 '''
 
-def main():
-    ### Get the input (Ticker)
-    # importform(service, spreadsheet_id,range):
-    symbollistmain = importform(sheet_service, file_id, "'Form Responses 1'!B2:E")['values']
-    symbollist = symbollistmain[len(symbollistmain)-1]
-    symbols = {
-        "symbol01" : symbollist[0], 
-        "symbol02" : symbollist[1],
-        "symbol03" : symbollist[2], 
-        "symbol04" : symbollist[3]
-    }
-    print(symbollistmain)
-    ### Mark the record has been read
-    # MarkDone(sheet_service, file_id, symbollistmain, sheet01_id)
+def run_engine():
+        ### Get the input (Ticker)
+        # importform(service, spreadsheet_id,range):
+        symbollistmain = importform(sheet_service, file_id, "'Form Responses 1'!B2:E")['values']
+        symbollist = symbollistmain[len(symbollistmain)-1]
+        symbols = {
+            "symbol01" : symbollist[0], 
+            "symbol02" : symbollist[1],
+            "symbol03" : symbollist[2], 
+            "symbol04" : symbollist[3]
+        }
+        print(symbollistmain)
+        ### Mark the record has been read
+        # MarkDone(sheet_service, file_id, symbollistmain, sheet01_id)
 
-    ### Get historic data for stock and process the information
-    ReadHistDataAndProcess(sheet01_name, sheet02_name, sheet03_name, file_id, sheet_service, sheet02_id, sheet03_id, days, symbollist[0],symbols)
-    CreateRiskReturnNames(sheet_service, file_id, sheet03_name)
-    # formatCells(range, sheetid, colors)
-    # formatCells(range, sheet03_id, lightblue)
+        ### Get historic data for stock and process the information
+        ReadHistDataAndProcess(sheet01_name, sheet02_name, sheet03_name, file_id, sheet_service, sheet02_id, sheet03_id, days, symbollist[0],symbols)
+        CreateRiskReturnNames(sheet_service, file_id, sheet03_name)
+        # formatCells(range, sheetid, colors)
+        # formatCells(range, sheet03_id, lightblue)
 
-    ### Create sheet4 data + charts
-    CreateFinalReportSheet(sheet_service, file_id, sheet04_id, colors, named_ranges, days, sheet02_name, sheet03_name, sheet04_name, symbols)
-    
-    ### Adding sheet03 bubb chart
-    draw_chart = 'y' #input("Draw chart? :")
-    if draw_chart == 'y':
-        #chart_draw(service, sheet_id, domain, series,type)
-        chart_id = chart_draw(sheet_service, sheet04_id,named_ranges['stdev'],named_ranges['returns'],'LINE')
-        chart_id_bubble = chart_draw_bubble(sheet_service, sheet03_id)
+        ### Create sheet4 data + charts
+        CreateFinalReportSheet(sheet_service, file_id, sheet04_id, colors, named_ranges, days, sheet02_name, sheet03_name, sheet04_name, symbols)
+        ### Add query count
+        Processed(len(symbollistmain))
 
-    ### Clear sheets and charts
-    clear_sheet = input("Clear Sheet? ")
-    if clear_sheet == 'y':
-        sheetclear(sheet_service, chart_id)
+        ### Adding sheet03 bubb chart
+        draw_chart = 'y' #input("Draw chart? :")
         if draw_chart == 'y':
-            sheetclear(sheet_service, chart_id_bubble)
+            #chart_draw(service, sheet_id, domain, series,type)
+            chart_id = chart_draw(sheet_service, sheet04_id,named_ranges['stdev'],named_ranges['returns'],'LINE')
+            chart_id_bubble = chart_draw_bubble(sheet_service, sheet03_id)
+
+        ### Clear sheets and charts
+        clear_sheet = input("Clear Sheet? ")
+        if clear_sheet == 'y':
+            sheetclear(sheet_service)
+            if draw_chart == 'y':
+                sheetclearchart(sheet_service, chart_id_bubble)
+                sheetclearchart(sheet_service, chart_id)
+
+###################################################################################################
+#############################  Main function  #####################################################
+###################################################################################################
+def main():
+
+    while True:
+        ### Read the Form sheet and note the number of entries there
+        symbollistmain = importform(sheet_service, file_id, "'Form Responses 1'!B2:E")['values']
+        total_avail_entries = len(symbollistmain)
+
+        ### Read the PersistantData sheet and note the number of processed entries
+        total_processed_entries = int(sheet_service.spreadsheets().values().get(spreadsheetId=file_id, range="'PersistentData'!C2", majorDimension='ROWS').execute()['values'][0][0])
+        print(total_processed_entries)
+        if (total_processed_entries < total_avail_entries):
+            # call run_engine
+            run_engine()
+
+            # update the processed record number
+
+
+        # Sleep for 10 seconds before searching for new entries
+        time.sleep(10)
 
 main()

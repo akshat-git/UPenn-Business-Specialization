@@ -225,7 +225,7 @@ def formatCells(range, sheetid, colors):
         spreadsheetId = file_id,
         body = request_body_format_cells
     ).execute()
-def sheetclear(service,chartid):
+def sheetclear(service):
     request_body_clear = {
         'requests':[
             {
@@ -266,7 +266,16 @@ def sheetclear(service,chartid):
                     'index': 0,
                     'sheetId': sheet04_id
                 }
-            },
+            }
+        ]
+    }
+    service.spreadsheets().batchUpdate(
+        spreadsheetId = file_id,
+        body = request_body_clear
+    ).execute()
+def sheetclearchart(service,chartid):
+    request_body_clear = {
+        'requests':[
             {
                 'deleteEmbeddedObject': {
                     'objectId': chartid
@@ -515,7 +524,7 @@ def sheet04(sheet02_name, sheet03_name, sheet04_name, sheet04_id, file_id,symbol
         spreadsheetId = file_id,
         body = request_body_sharpe_col
     ).execute()
-def chart_draw(service, sheet_id, domain, series,type):
+def chart_draw(service, sheet_id, domain, series, type):
     request_body = {
         'requests': [
             {
