@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import SharpeCalc
 
 def Reverse(lst): 
     return [ele for ele in reversed(lst)] 
@@ -57,3 +58,34 @@ def stock_returns_over_interval(stock, sd, ed, prevhist, prex = False):
 def print_stock_returns_to_terminal(stock):
     print("Expected returns over 18 day interval is: $" + str(stock_returns_over_interval(stock, 0, 18, 360)))
     print("With recent data: $" + str(stock_returns_over_interval(stock, 0, 18, 36)))
+
+def stock_sharpe_ratio(ticker, time, prevhdays):
+    return SharpeCalc.sharpe(ticker, time, prevhdays)
+
+def project_compare_stocks(tickers, bd, sd, dph = 180):
+    hs_proj = None
+    hs_proj_ret = 0
+    for i in range(0, len(tickers)):
+        lr_ret = stock_returns_over_interval(tickers[i], bd, sd, dph)
+        if lr_ret > hs_proj_ret:
+            hs_proj = tickers[i]
+            hs_proj_ret = lr_ret
+    hs_sharpe = None
+    hs_sharpe_ret = 0
+    for i in range(0, len(tickers)):
+        lr_ret = stock_sharpe_ratio(tickers[i], (sd-bd), dph)
+        if lr_ret > hs_sharpe_ret:
+            hs_sharpe = tickers[i]
+            hs_sharpe_ret = lr_ret
+    hs_risk = None
+    hs_risk_ret = (10^1000)
+    for i in range(0, len(tickers)):
+        lr_ret = SharpeCalc.risk(tickers[i], dph)
+        if lr_ret < hs_risk_ret:
+            hs_risk = tickers[i]
+            hs_risk_ret = lr_ret
+    return hs_proj, hs_sharpe, hs_risk
+
+
+stock_list = ['AAPL', 'MSFT', 'ZM', 'TSLA', 'UAL', 'AAL', 'BA', 'SPLK', 'INTC', 'GOOG']
+print(project_compare_stocks(stock_list, 0, 18, 180))
