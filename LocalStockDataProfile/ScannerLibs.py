@@ -86,3 +86,14 @@ def project_compare_stocks(tickers, bd, sd, dph = 180):
             hs_risk = tickers[i]
             hs_risk_ret = lr_ret
     return hs_proj, hs_sharpe, hs_risk
+
+def calculate_buy_or_sell(ticker, pvh):
+    npxarr, npyarr, m, b = project_stock(ticker, date_list(pvh), scan_stock(ticker, pvh, 5, 'Close'), 180, False)
+    stock_hist = scan_stock(ticker, pvh, 5, 'Close')
+    stock_date = date_list(pvh)
+    if stock_hist[len(stock_hist)-1] > b + stock_hist[len(stock_hist)-1]/30:
+        return 'sell'
+    if stock_hist[len(stock_hist)-1] > b - stock_hist[len(stock_hist)-1]/60:
+        return 'buy'
+    else:
+        return 'none'
