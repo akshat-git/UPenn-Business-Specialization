@@ -177,6 +177,22 @@ def run_engine():
                 sheetclearchart(sheet_service, chart_id_bubble)
                 sheetclearchart(sheet_service, chart_id)
 
+def CopyToNewFile(username,row):
+    name =  "Request #" + str(row)+": " + str(username)+"'s Stock Portfolio Analysis:"
+    newfile_metadata = {
+        'name': name,
+        'parents': target_folder_id,
+        'starred': True,
+        'description': 'Stock Portfolio'
+    }
+
+    drive_service.files().copy(
+        fileId = file_id,
+        body = newfile_metadata
+    ).execute()
+
+    print('Done copying')
+
 ###################################################################################################
 #############################  Main function  #####################################################
 ###################################################################################################
@@ -185,6 +201,7 @@ def main():
     while True:
         ### Read the Form sheet and note the number of entries there
         symbollistmain = importform(sheet_service, file_id, "'Form Responses 1'!B2:E")['values']
+        usernamelistmain = importform(sheet_service, file_id, "'Form Responses 1'!F2:F")['values']
         total_avail_entries = len(symbollistmain)
 
         ### Read the PersistantData sheet and note the number of processed entries
@@ -193,9 +210,9 @@ def main():
         if (total_processed_entries < total_avail_entries):
             # call run_engine
             run_engine()
-
+            print(usernamelistmain)
             # update the processed record number
-
+            CopyToNewFile(str(usernamelistmain[total_processed_entries][0]),total_processed_entries+1)
 
         # Sleep for 10 seconds before searching for new entries
         time.sleep(10)
