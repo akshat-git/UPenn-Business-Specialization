@@ -4,13 +4,13 @@
 This git repo turns ideas and projects used in the UPenn Business Specialization from Coursera, and it uses google sheets API's to integrate it into a python script that updates a new google sheet for the user. This makes my code and the sheets I created to assist myself in the specialization more accessible and replicable on websites or commercial use.
 
 [https://coursera.org/share/4ec21da8a22cf0d0fd5e021b79c9a7be](url)
-- certificate of completion of the 5-course specialization on the following topics:
-Course Certificates Completed
-  Decision-Making and Scenarios
-  Wharton Business and Financial Modeling Capstone
-  Introduction to Spreadsheets and Models
-  Fundamentals of Quantitative Modeling
-  Modeling Risk and Realities
+- Certificate of completion of the 5-course specialization on the following topics:
+- Course Certificates Completed
+  - Decision-Making and Scenarios
+  - Wharton Business and Financial Modeling Capstone
+  - Introduction to Spreadsheets and Models
+  - Fundamentals of Quantitative Modeling
+  - Modeling Risk and Realities
 
 Wharton's Business and Financial Modeling Specialization is designed to help you make informed business and financial decisions. These foundational courses will introduce you to spreadsheet models, modeling techniques, and common applications for investment analysis, company valuation, forecasting, and more. When you complete the Specialization, you'll be ready to use your own data to describe realities, build scenarios, and predict performance. 
 
