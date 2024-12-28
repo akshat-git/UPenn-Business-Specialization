@@ -1,5 +1,5 @@
 # Business-Machines
-Business Machines
+This git repo turns ideas and projects used in the UPenn Business Specialization from Coursera, and it uses google sheets API's to integrate it into a python script that updates a new google sheet for the user. This makes my code and the sheets I created to assist myself in the specialization more accessible and replicable on websites or commercial use.
 
 First you must enable the google sheets and google drive api from the google cloud console, and take the credentials(OAuth2). There are videos about how to enable these and start off with them.
 You must then put these files in your working directory, and put the names into the ids file under the name credentials for each
